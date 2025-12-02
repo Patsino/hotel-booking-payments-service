@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace HotelBooking.Payments.Infrastructure.Persistence;
 
@@ -7,10 +8,22 @@ public sealed class PaymentsDbContextFactory : IDesignTimeDbContextFactory<Payme
 {
     public PaymentsDbContext CreateDbContext(string[] args)
     {
-        var connectionString =
-            Environment.GetEnvironmentVariable("ConnectionStrings__PaymentsDatabase");
+		var connectionString =
+			Environment.GetEnvironmentVariable("ConnectionStrings__HotelBookingDatabase");
 
-        var optionsBuilder = new DbContextOptionsBuilder<PaymentsDbContext>();
+		if (string.IsNullOrWhiteSpace(connectionString))
+		{
+			connectionString = "Server=(localdb)\\mssqllocaldb;Database=HotelBooking;Trusted_Connection=True;TrustServerCertificate=True;";
+		}
+
+		if (string.IsNullOrWhiteSpace(connectionString))
+		{
+			throw new InvalidOperationException(
+				"ConnectionStrings:HotelBookingDatabase is not configured for design-time."
+			);
+		}
+
+		var optionsBuilder = new DbContextOptionsBuilder<PaymentsDbContext>();
 
         optionsBuilder.UseSqlServer(connectionString, sqlOptions =>
         {

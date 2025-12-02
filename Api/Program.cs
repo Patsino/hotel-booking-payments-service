@@ -80,10 +80,6 @@ using (var scope = app.Services.CreateScope())
 		await dbContext.Database.MigrateAsync();
 		logger.LogInformation("Database migration completed");
 
-		// Wait for Reservations service
-		logger.LogInformation("Waiting 15 seconds for Reservations service to seed...");
-		await Task.Delay(15000);
-
 		logger.LogInformation("Starting database seeding...");
 		var seeder = services.GetRequiredService<PaymentsDataSeeder>();
 		await seeder.SeedAsync();

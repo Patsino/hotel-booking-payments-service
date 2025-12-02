@@ -139,5 +139,12 @@ namespace Api.Controllers
 					.First().Status.ToString()
 			});
 		}
+
+		[Authorize(Policy = "ServiceToService")]
+		[HttpGet("reservation/{reservationId}/all")]
+		public async Task<IActionResult> GetAllForReservation(int reservationId)
+		{
+			return Ok(await _repository.GetByReservationIdAsync(reservationId));
+		}
 	}
 }
