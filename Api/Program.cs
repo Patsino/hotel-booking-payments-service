@@ -1,3 +1,4 @@
+using Api.Middleware;
 using HotelBooking.Payments.Infrastructure;
 using HotelBooking.Payments.Infrastructure.Persistence;
 using Infrastructure.Authentication;
@@ -13,6 +14,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddControllers();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -91,6 +95,8 @@ using (var scope = app.Services.CreateScope())
 		throw;
 	}
 }
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
