@@ -1,0 +1,85 @@
+# ===========================================
+# Hotel Booking Payments Service - Docker Compose
+# ===========================================
+# Local development environment with SQL Server
+# ===========================================
+# NOTE: This is a TEMPORARY docker-compose for testing this service only.
+# Final docker-compose will be in a separate repository combining all services.
+# ===========================================
+# Port mapping for multi-service setup:
+#   - 8081 ? users-service
+#   - 8082 ? hotels-service
+#   - 8083 ? reservations-service
+#   - 8084 ? payments-service
+# ===========================================
+
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hotel-booking-sqlserver
+    env_file:
+      - .env.docker
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P '${MSSQL_SA_PASSWORD}' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - hotel-booking-network
+
+  # Payments Service
+  payments-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hotel-booking-payments-service
+    env_file:
+      - .env.docker
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Connection string (infrastructure config, not secret)
+      - ConnectionStrings__HotelBookingDatabase=Server=sqlserver,1433;Database=HotelBooking;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;
+      # JWT settings
+      - Jwt__Issuer=HotelBooking
+      - Jwt__Audience=HotelBookingUsers
+      - Jwt__ExpirationMinutes=60
+      # Inter-service URLs (use service names in Docker network)
+      - ServiceUrls__Reservations=http://reservations-service:8080
+      - ServiceUrls__Hotels=http://hotels-service:8080
+      - ServiceUrls__Payments=http://payments-service:8080
+      - ServiceUrls__Users=http://users-service:8080
+      # Logging
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Warning
+      - Logging__LogLevel__Microsoft.EntityFrameworkCore=Warning
+    ports:
+      - "8084:8080"  # Host:Container - Payments service on 8084
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - hotel-booking-network
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  sqlserver-data:
+    name: hotel-booking-sqlserver-data
+
+networks:
+  hotel-booking-network:
+    name: hotel-booking-network
+    driver: bridge

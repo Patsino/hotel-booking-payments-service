@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Application.Handlers
 {
-	public sealed class CreatePaymentIntentHandler
+	public sealed class CreatePaymentIntentHandler : ICreatePaymentIntentHandler
 	{
 		private readonly IPaymentsRepository _repository;
 		private readonly IStripePaymentService _stripeService;

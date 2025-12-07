@@ -4,12 +4,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Authentication
 {
+	[ExcludeFromCodeCoverage]
 	public static class JwtAuthenticationExtensions
 	{
 		public static IServiceCollection AddJwtAuthentication(
@@ -17,8 +19,19 @@ namespace Infrastructure.Authentication
 			IConfiguration configuration)
 		{
 			var jwtSettings = configuration.GetSection("Jwt");
-			var secretKey = jwtSettings["SecretKey"]
+			
+			// Support both environment variables and appsettings
+			var secretKey = Environment.GetEnvironmentVariable("Jwt__SecretKey")
+				?? jwtSettings["SecretKey"]
 				?? throw new InvalidOperationException("JWT SecretKey not configured");
+			
+			var issuer = Environment.GetEnvironmentVariable("Jwt__Issuer")
+				?? jwtSettings["Issuer"]
+				?? "HotelBooking";
+			
+			var audience = Environment.GetEnvironmentVariable("Jwt__Audience")
+				?? jwtSettings["Audience"]
+				?? "HotelBookingUsers";
 
 			services.AddAuthentication(options =>
 			{
@@ -34,8 +47,8 @@ namespace Infrastructure.Authentication
 					ValidateAudience = true,
 					ValidateLifetime = true,
 					ValidateIssuerSigningKey = true,
-					ValidIssuer = jwtSettings["Issuer"],
-					ValidAudience = jwtSettings["Audience"],
+					ValidIssuer = issuer,
+					ValidAudience = audience,
 					IssuerSigningKey = new SymmetricSecurityKey(
 						Encoding.UTF8.GetBytes(secretKey)),
 					ClockSkew = TimeSpan.FromMinutes(5)

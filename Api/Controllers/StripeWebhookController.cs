@@ -2,9 +2,11 @@
 using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Api.Controllers
 {
+	[ExcludeFromCodeCoverage]
 	[ApiController]
 	[Route("api/webhooks")]
 	public sealed class StripeWebhookController : ControllerBase

@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HotelBooking.Payments.Infrastructure.Persistence;
 
+[ExcludeFromCodeCoverage]
 public sealed class PaymentsDbContextFactory : IDesignTimeDbContextFactory<PaymentsDbContext>
 {
     public PaymentsDbContext CreateDbContext(string[] args)

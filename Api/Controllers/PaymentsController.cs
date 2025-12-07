@@ -14,18 +14,18 @@ namespace Api.Controllers
 	public sealed class PaymentsController : ControllerBase
 	{
 		private readonly IPaymentsRepository _repository;
-		private readonly CreatePaymentIntentHandler _createIntentHandler;
-		private readonly ConfirmPaymentHandler _confirmHandler;
-		private readonly RefundPaymentHandler _refundHandler;
+		private readonly ICreatePaymentIntentHandler _createIntentHandler;
+		private readonly IConfirmPaymentHandler _confirmHandler;
+		private readonly IRefundPaymentHandler _refundHandler;
 		private readonly IHttpClientFactory _httpClientFactory;
 		private readonly ICurrentUserService _currentUser;
 		private readonly ILogger<PaymentsController> _logger;
 
 		public PaymentsController(
 			IPaymentsRepository repository,
-			CreatePaymentIntentHandler createIntentHandler,
-			ConfirmPaymentHandler confirmHandler,
-			RefundPaymentHandler refundHandler,
+			ICreatePaymentIntentHandler createIntentHandler,
+			IConfirmPaymentHandler confirmHandler,
+			IRefundPaymentHandler refundHandler,
 			IHttpClientFactory httpClientFactory,
 			ICurrentUserService currentUser,
 			ILogger<PaymentsController> logger)

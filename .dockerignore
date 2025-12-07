@@ -1,0 +1,77 @@
+# ===========================================
+# Docker Ignore - Hotel Booking Payments Service
+# ===========================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE and editors
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# NuGet
+*.nupkg
+**/packages/
+
+# Test results
+**/TestResults/
+**/coverage/
+*.coverage
+*.coveragexml
+
+# Environment files (sensitive!)
+.env
+*.env
+.env.*
+!.env.example
+
+# Documentation
+*.md
+!README-DOCKER.md
+docs/
+
+# Docker files (not needed inside image)
+docker-compose*.yml
+docker-compose*.yaml
+Dockerfile*
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Rider
+.idea/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Local settings
+appsettings.Development.json
+appsettings.Local.json
+
+# PowerShell scripts (not needed in container)
+*.ps1
+
+# Test projects (optional: uncomment if you don't want tests in image)
+# Tests/

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace Api.Middleware
 {
+	[ExcludeFromCodeCoverage]
 	public sealed class GlobalExceptionHandler : IExceptionHandler
 	{
 		private readonly ILogger<GlobalExceptionHandler> _logger;

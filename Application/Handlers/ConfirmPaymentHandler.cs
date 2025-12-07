@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Application.Handlers
 {
-	public sealed class ConfirmPaymentHandler
+	public sealed class ConfirmPaymentHandler : IConfirmPaymentHandler
 	{
 		private readonly IPaymentsRepository _repository;
 		private readonly IStripePaymentService _stripeService;

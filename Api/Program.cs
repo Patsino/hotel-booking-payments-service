@@ -6,9 +6,17 @@ using Infrastructure.Seeding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
+// Load .env file for local development (before creating builder)
+// VS runs from Api/, but .env is in solution root, so go up one level
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+if (File.Exists(envPath))
+{
+	DotNetEnv.Env.Load(envPath);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.EnvironmentName);
 
 // ADD AUTHENTICATION
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -66,34 +74,32 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-//using (var scope = app.Services.CreateScope())
-//{
-//	var dbContext = scope.ServiceProvider.GetRequiredService<PaymentsDbContext>();
-//	dbContext.Database.Migrate();
-//}
-
-using (var scope = app.Services.CreateScope())
+// Skip migration and seeding in Testing environment
+if (!app.Environment.IsEnvironment("Testing"))
 {
-	var services = scope.ServiceProvider;
-	var logger = services.GetRequiredService<ILogger<Program>>();
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<Program>>();
 
-	try
-	{
-		logger.LogInformation("Starting database migration...");
-		var dbContext = services.GetRequiredService<PaymentsDbContext>();
-		await dbContext.Database.MigrateAsync();
-		logger.LogInformation("Database migration completed");
+        try
+        {
+            logger.LogInformation("Starting database migration...");
+            var dbContext = services.GetRequiredService<PaymentsDbContext>();
+            await dbContext.Database.MigrateAsync();
+            logger.LogInformation("Database migration completed");
 
-		logger.LogInformation("Starting database seeding...");
-		var seeder = services.GetRequiredService<PaymentsDataSeeder>();
-		await seeder.SeedAsync();
-		logger.LogInformation("Database seeding completed");
-	}
-	catch (Exception ex)
-	{
-		logger.LogError(ex, "An error occurred during migration or seeding");
-		throw;
-	}
+            logger.LogInformation("Starting database seeding...");
+            var seeder = services.GetRequiredService<PaymentsDataSeeder>();
+            await seeder.SeedAsync();
+            logger.LogInformation("Database seeding completed");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred during migration or seeding");
+            throw;
+        }
+    }
 }
 
 app.UseExceptionHandler();

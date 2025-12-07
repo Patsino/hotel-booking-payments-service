@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Handlers
 {
-	public sealed class RefundPaymentHandler
+	public sealed class RefundPaymentHandler : IRefundPaymentHandler
 	{
 		private readonly IPaymentsRepository _repository;
 		private readonly IStripePaymentService _stripeService;

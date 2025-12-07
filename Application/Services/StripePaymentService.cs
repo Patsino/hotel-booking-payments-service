@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Stripe;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Application.Services
 {
+	[ExcludeFromCodeCoverage]
 	public sealed class StripePaymentService : IStripePaymentService
 	{
 		private readonly ILogger<StripePaymentService> _logger;
@@ -13,7 +15,10 @@ namespace Application.Services
 		public StripePaymentService(IConfiguration configuration, ILogger<StripePaymentService> logger)
 		{
 			_logger = logger;
-			_apiKey = configuration["Stripe:SecretKey"]
+			
+			// Support both environment variables and appsettings
+			_apiKey = Environment.GetEnvironmentVariable("Stripe__SecretKey")
+				?? configuration["Stripe:SecretKey"]
 				?? throw new InvalidOperationException("Stripe:SecretKey not configured");
 
 			StripeConfiguration.ApiKey = _apiKey;

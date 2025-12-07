@@ -144,7 +144,22 @@ namespace Api.Controllers
 		[HttpGet("reservation/{reservationId}/all")]
 		public async Task<IActionResult> GetAllForReservation(int reservationId)
 		{
-			return Ok(await _repository.GetByReservationIdAsync(reservationId));
+			var payments = await _repository.GetByReservationIdAsync(reservationId);
+			
+			return Ok(payments.Select(p => new
+			{
+				p.Id,
+				p.ReservationId,
+				p.Amount,
+				p.AmountRefunded,
+				Status = p.Status.ToString(),
+				Provider = p.Provider.ToString(),
+				PaymentMethodType = p.PaymentMethodType?.ToString(),
+				p.PaymentIntentId,
+				p.ProviderPaymentId,
+				p.PaidAt,
+				p.CreatedAt
+			}));
 		}
 	}
 }
