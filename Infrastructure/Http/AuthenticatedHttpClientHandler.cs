@@ -50,6 +50,15 @@ namespace Infrastructure.Http
 					request.Headers.TryAddWithoutValidation("Authorization", authHeader);
 					_logger.LogDebug("Forwarded user JWT to request: {Uri}", request.RequestUri);
 				}
+
+				// Forward correlation ID for distributed tracing
+				var correlationId = httpContext.Items["CorrelationId"]?.ToString();
+				if (!string.IsNullOrEmpty(correlationId))
+				{
+					request.Headers.Add("X-Correlation-ID", correlationId);
+					_logger.LogDebug("Forwarded CorrelationId {CorrelationId} to request: {Uri}", 
+						correlationId, request.RequestUri);
+				}
 			}
 
 			return await base.SendAsync(request, cancellationToken);

@@ -19,7 +19,13 @@ namespace Api.Middleware
 			Exception exception,
 			CancellationToken cancellationToken)
 		{
-			_logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
+			// Get correlation ID from context
+			var correlationId = httpContext.Items["CorrelationId"]?.ToString() ?? "unknown";
+
+			_logger.LogError(exception, 
+				"An unhandled exception occurred. CorrelationId: {CorrelationId}, Message: {Message}", 
+				correlationId, 
+				exception.Message);
 
 			var (statusCode, message) = exception switch
 			{
@@ -32,6 +38,7 @@ namespace Api.Middleware
 			await httpContext.Response.WriteAsJsonAsync(new
 			{
 				error = message,
+				correlationId = correlationId,
 				timestamp = DateTime.UtcNow
 			}, cancellationToken);
 
