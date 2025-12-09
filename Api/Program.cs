@@ -1,4 +1,5 @@
 using Api.Middleware;
+using Api.Filters;
 using HotelBooking.Payments.Infrastructure;
 using HotelBooking.Payments.Infrastructure.Persistence;
 using Infrastructure.Authentication;
@@ -59,6 +60,8 @@ builder.Services.AddSwaggerGen(c =>
 			Array.Empty<string>()
 		}
 	});
+
+	c.SchemaFilter<ExampleSchemaFilter>();
 });
 
 builder.Services.AddHealthChecks()
