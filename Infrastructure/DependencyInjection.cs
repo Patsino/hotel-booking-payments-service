@@ -65,26 +65,25 @@ public static class DependencyInjection
 
 		services.AddTransient<AuthenticatedHttpClientHandler>();
 
-		// Configure Polly retry and timeout policies for resilience
-		var retryPolicy = HttpPolicyExtensions
-			.HandleTransientHttpError() // Handles 5xx and 408
-			.WaitAndRetryAsync(
-				retryCount: 3,
-				sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-				onRetry: (outcome, timespan, retryAttempt, context) =>
-				{
-					Console.WriteLine($"Retry {retryAttempt} after {timespan.TotalSeconds}s due to: {outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString()}");
-				});
+	// Configure Polly retry and timeout policies for resilience
+	// Optimized: 3 retries with 0.5s, 1s, 2s delays (3.5s total) + 5s per-operation timeout
+	var retryPolicy = HttpPolicyExtensions
+		.HandleTransientHttpError() // Handles 5xx and 408
+		.WaitAndRetryAsync(
+			retryCount: 3,
+			sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(0.5 * Math.Pow(2, retryAttempt)),
+			onRetry: (outcome, timespan, retryAttempt, context) =>
+			{
+				Console.WriteLine($"Retry {retryAttempt} after {timespan.TotalSeconds}s due to: {outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString()}");
+			});
 
-		var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(30));
-
-		services.AddHttpClient("ReservationsService", client =>
+	var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(5));		services.AddHttpClient("ReservationsService", client =>
 		{
 			var baseUrl = Environment.GetEnvironmentVariable("ServiceUrls__Reservations")
 				?? configuration["ServiceUrls:Reservations"] 
 				?? "http://localhost:5003";
 			client.BaseAddress = new Uri(baseUrl);
-			client.Timeout = TimeSpan.FromSeconds(100);
+			client.Timeout = TimeSpan.FromSeconds(15);
 		})
 		.AddHttpMessageHandler<AuthenticatedHttpClientHandler>()
 		.AddPolicyHandler(retryPolicy)
@@ -96,7 +95,7 @@ public static class DependencyInjection
 				?? configuration["ServiceUrls:Hotels"] 
 				?? "http://localhost:5002";
 			client.BaseAddress = new Uri(baseUrl);
-			client.Timeout = TimeSpan.FromSeconds(100);
+			client.Timeout = TimeSpan.FromSeconds(15);
 		})
 		.AddHttpMessageHandler<AuthenticatedHttpClientHandler>()
 		.AddPolicyHandler(retryPolicy)
@@ -108,7 +107,7 @@ public static class DependencyInjection
 				?? configuration["ServiceUrls:Payments"] 
 				?? "http://localhost:5004";
 			client.BaseAddress = new Uri(baseUrl);
-			client.Timeout = TimeSpan.FromSeconds(100);
+			client.Timeout = TimeSpan.FromSeconds(15);
 		})
 		.AddHttpMessageHandler<AuthenticatedHttpClientHandler>()
 		.AddPolicyHandler(retryPolicy)
@@ -120,7 +119,7 @@ public static class DependencyInjection
 				?? configuration["ServiceUrls:Users"] 
 				?? "http://localhost:5001";
 			client.BaseAddress = new Uri(baseUrl);
-			client.Timeout = TimeSpan.FromSeconds(100);
+			client.Timeout = TimeSpan.FromSeconds(15);
 		})
 		.AddHttpMessageHandler<AuthenticatedHttpClientHandler>()
 		.AddPolicyHandler(retryPolicy)
