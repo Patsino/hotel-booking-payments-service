@@ -34,7 +34,8 @@ public class ExampleSchemaFilter : ISchemaFilter
 		{
 			schema.Example = new OpenApiObject
 			{
-				["paymentIntentId"] = new OpenApiString("pi_3MtwBwLkdIwHu7ix28a3tqPa")
+				["paymentIntentId"] = new OpenApiString("pi_3MtwBwLkdIwHu7ix28a3tqPa"),
+				["paymentMethodId"] = new OpenApiString("pm_card_visa")
 			};
 		}
 		else if (context.Type == typeof(RefundPaymentCommand))

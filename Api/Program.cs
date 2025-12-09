@@ -110,9 +110,9 @@ app.UseExceptionHandler();
 // Register correlation ID middleware EARLY in the pipeline
 app.UseMiddleware<Api.Middleware.CorrelationIdMiddleware>();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
-	app.UseSwagger();
+    app.UseSwagger();
 	app.UseSwaggerUI();
 }
 

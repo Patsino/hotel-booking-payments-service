@@ -109,13 +109,13 @@ namespace Api.Controllers
 		}
 
 		[Authorize(Policy = "AdminOnly")]
-		[HttpPost("{id}/refund")]
-		public async Task<IActionResult> RefundPayment(int id, [FromBody] RefundPaymentCommand command)
+		[HttpPost("refund")]
+		public async Task<IActionResult> RefundPayment([FromBody] RefundPaymentCommand command)
 		{
 			try
 			{
-				await _refundHandler.HandleAsync(command with { PaymentId = id });
-				_logger.LogInformation("Refund processed for payment: {PaymentId} by Admin", id);
+				await _refundHandler.HandleAsync(command);
+				_logger.LogInformation("Refund processed for payment: {PaymentId} by Admin", command.PaymentId);
 				return Ok(new { message = "Refund processed successfully" });
 			}
 			catch (InvalidOperationException ex)
