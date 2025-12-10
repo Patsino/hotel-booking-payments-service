@@ -480,7 +480,7 @@ public sealed class PaymentsControllerTests
 
         // Note: RefundPayment has AdminOnly policy - in unit test we bypass auth
         // Act
-        var result = await _controller.RefundPayment(1, command);
+        var result = await _controller.RefundPayment(command);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -498,7 +498,7 @@ public sealed class PaymentsControllerTests
             .ThrowsAsync(new InvalidOperationException("Payment not found"));
 
         // Act
-        var result = await _controller.RefundPayment(1, command);
+        var result = await _controller.RefundPayment(command);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
