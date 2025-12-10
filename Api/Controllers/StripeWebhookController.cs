@@ -2,6 +2,7 @@
 using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Api.Controllers
@@ -28,7 +29,40 @@ namespace Api.Controllers
 			_logger = logger;
 		}
 
+		/// <summary>
+		/// Stripe webhook endpoint for payment events
+		/// </summary>
+		/// <returns>OK if webhook processed successfully</returns>
+		/// <remarks>
+		/// Receives webhook events from Stripe for payment status updates.
+		/// Webhook signature is validated using Stripe webhook secret from configuration.
+		/// 
+		/// **No request body required** - Stripe sends the event data automatically.
+		/// 
+		/// **Handled events:**
+		/// - **payment_intent.succeeded**: Payment completed successfully
+		/// - **payment_intent.payment_failed**: Payment failed
+		/// - **payment_intent.canceled**: Payment intent canceled
+		/// - **payment_intent.processing**: Payment is being processed
+		/// - **payment_intent.requires_action**: Additional action required (e.g., 3D Secure)
+		/// - **charge.refunded**: Refund completed
+		/// 
+		/// **Actions performed:**
+		/// - Updates payment status in database
+		/// - Notifies Reservations Service of payment status changes
+		/// - Logs all events for audit trail
+		/// </remarks>
+		/// <response code="200">Webhook processed successfully</response>
+		/// <response code="400">Invalid signature or webhook secret not configured</response>
+		/// <response code="500">Webhook processing failed</response>
 		[HttpPost("stripe")]
+		[SwaggerOperation(Summary = "Stripe webhook", Description = "Receive Stripe payment events", OperationId = "StripeWebhook", Tags = new[] { "Webhooks" })]
+		[SwaggerResponse(200, "Webhook processed")]
+		[SwaggerResponse(400, "Invalid signature")]
+		[SwaggerResponse(500, "Processing failed")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 		public async Task<IActionResult> HandleStripeWebhook()
 		{
 			var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();

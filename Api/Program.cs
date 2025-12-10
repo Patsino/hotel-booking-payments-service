@@ -32,8 +32,27 @@ builder.Services.AddSwaggerGen(c =>
 {
 	c.SwaggerDoc("v1", new OpenApiInfo
 	{
-		Title = "Hotel Booking - Payments API",
-		Version = "v1"
+		Title = "Hotel Booking - Payments Service API",
+		Version = "v1.0.0",
+		Description = @"Payments microservice for processing payments and refunds via Stripe.
+
+**Features:**
+- Create Stripe payment intents
+- Confirm payments
+- Process refunds (full/partial)
+- Stripe webhook integration for real-time updates
+- View payment history by reservation
+
+**Authentication:** JWT Bearer token required (except webhooks).
+
+**Roles:** User, HotelOwner, Admin
+
+**Payment Provider:** Stripe",
+		Contact = new OpenApiContact
+		{
+			Name = "Hotel Booking System",
+			Email = "support@hotelbooking.com"
+		}
 	});
 
 	// ADD SWAGGER AUTH
@@ -61,6 +80,14 @@ builder.Services.AddSwaggerGen(c =>
 		}
 	});
 
+	var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+	if (File.Exists(xmlPath))
+	{
+		c.IncludeXmlComments(xmlPath);
+	}
+
+	c.EnableAnnotations();
 	c.SchemaFilter<ExampleSchemaFilter>();
 });
 
