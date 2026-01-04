@@ -8,8 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Polly;
 
-// Load .env file for local development (before creating builder)
-// VS runs from Api/, but .env is in solution root, so go up one level
+
 var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
 if (File.Exists(envPath))
 {
@@ -20,7 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.EnvironmentName);
 
-// ADD AUTHENTICATION
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddControllers();
@@ -56,7 +54,6 @@ builder.Services.AddSwaggerGen(c =>
 		}
 	});
 
-	// ADD SWAGGER AUTH
 	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
 		Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
@@ -117,17 +114,15 @@ if (!app.Environment.IsEnvironment("Testing"))
         {
             var dbContext = services.GetRequiredService<PaymentsDbContext>();
 
-            // For Production (Azure Free tier with cold start), use retry logic with longer timeout
             if (app.Environment.IsProduction())
             {
                 logger.LogInformation("Production environment detected. Using retry policy for cold database start...");
 
-                // Configure retry policy with exponential backoff for cold Azure DB
                 var retryPolicy = Policy
                     .Handle<Exception>()
                     .WaitAndRetryAsync(
                         retryCount: 5,
-                        sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // 2, 4, 8, 16, 32 sec
+                        sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                         onRetry: (exception, timeSpan, retryCount, context) =>
                         {
                             logger.LogWarning(
@@ -137,7 +132,6 @@ if (!app.Environment.IsEnvironment("Testing"))
                                 exception.Message);
                         });
 
-                // Set longer command timeout for cold database (default is 30 sec)
                 dbContext.Database.SetCommandTimeout(TimeSpan.FromSeconds(90));
 
                 await retryPolicy.ExecuteAsync(async () =>
@@ -157,7 +151,6 @@ if (!app.Environment.IsEnvironment("Testing"))
             }
             else
             {
-                // Development/Staging: use default behavior (fast local DB)
                 logger.LogInformation("Starting database migration...");
                 await dbContext.Database.MigrateAsync();
                 logger.LogInformation("Database migration completed");
@@ -178,7 +171,6 @@ if (!app.Environment.IsEnvironment("Testing"))
 
 app.UseExceptionHandler();
 
-// Register correlation ID middleware EARLY in the pipeline
 app.UseMiddleware<Api.Middleware.CorrelationIdMiddleware>();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
@@ -189,7 +181,6 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
 app.UseCors();
 
-// ADD THESE BEFORE MapControllers
 app.UseAuthentication();
 app.UseAuthorization();
 

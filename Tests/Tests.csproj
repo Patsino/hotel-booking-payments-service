@@ -40,7 +40,7 @@
   <PropertyGroup>
     <CollectCoverage>true</CollectCoverage>
     <CoverletOutputFormat>cobertura</CoverletOutputFormat>
-    <Exclude>[Api]Program,[*]*.Migrations.*</Exclude>
+    <Exclude>[*]*.Migrations.*</Exclude>
     <ExcludeByFile>**/Program.cs</ExcludeByFile>
   </PropertyGroup>
 

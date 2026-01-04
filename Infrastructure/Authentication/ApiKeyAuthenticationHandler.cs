@@ -2,14 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Authentication
 {
@@ -41,10 +36,8 @@ namespace Infrastructure.Authentication
 				return Task.FromResult(AuthenticateResult.NoResult());
 			}
 
-			// Support both environment variables and appsettings for API keys
 			var validApiKeys = new Dictionary<string, string>();
 			
-			// Try to get from environment variables first
 			var envUsersKey = Environment.GetEnvironmentVariable("ApiKeys__Services__UsersService");
 			var envHotelsKey = Environment.GetEnvironmentVariable("ApiKeys__Services__HotelsService");
 			var envReservationsKey = Environment.GetEnvironmentVariable("ApiKeys__Services__ReservationsService");
@@ -64,7 +57,6 @@ namespace Infrastructure.Authentication
 			}
 			else
 			{
-				// Fallback to configuration
 				validApiKeys = _configuration.GetSection("ApiKeys:Services").Get<Dictionary<string, string>>() 
 					?? new Dictionary<string, string>();
 			}

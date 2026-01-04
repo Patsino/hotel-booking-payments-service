@@ -65,10 +65,9 @@ public static class DependencyInjection
 
 		services.AddTransient<AuthenticatedHttpClientHandler>();
 
-	// Configure Polly retry and timeout policies for resilience
-	// Optimized: 3 retries with 0.5s, 1s, 2s delays (3.5s total) + 5s per-operation timeout
+
 	var retryPolicy = HttpPolicyExtensions
-		.HandleTransientHttpError() // Handles 5xx and 408
+		.HandleTransientHttpError()
 		.WaitAndRetryAsync(
 			retryCount: 3,
 			sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(0.5 * Math.Pow(2, retryAttempt)),

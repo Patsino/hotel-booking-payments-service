@@ -2,11 +2,6 @@
 using HotelBooking.Payments.Domain.Payments;
 using HotelBooking.Payments.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repsitories
 {

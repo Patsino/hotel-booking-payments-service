@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Http
 {
@@ -31,7 +26,7 @@ namespace Infrastructure.Http
 			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
-			// ALWAYS add service API key for service-to-service auth
+			//  add service API key for service-to-service auth
 			var apiKey = _configuration["ApiKeys:Current"];
 			if (!string.IsNullOrEmpty(apiKey))
 			{
@@ -39,7 +34,7 @@ namespace Infrastructure.Http
 				_logger.LogDebug("Added service API key to request: {Uri}", request.RequestUri);
 			}
 
-			// ALSO forward user JWT if available (for user context)
+			//  forward user JWT if available (for user context)
 			var httpContext = _httpContextAccessor.HttpContext;
 			if (httpContext != null)
 			{

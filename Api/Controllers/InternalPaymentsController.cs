@@ -27,6 +27,10 @@ namespace Api.Controllers
 			_logger = logger;
 		}
 
+		/// <summary>
+		/// Process refund for a reservation.
+		/// Used by Reservations Service when admin approves cancellation.
+		/// </summary>
 		[HttpPost("reservation/{reservationId}/refund")]
 		public async Task<IActionResult> RefundReservation(int reservationId)
 		{
@@ -109,6 +113,10 @@ namespace Api.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Get payment summary for a reservation.
+		/// Used by other services to check payment status before operations.
+		/// </summary>
 		[HttpGet("reservation/{reservationId}/summary")]
 		public async Task<IActionResult> GetReservationPaymentSummary(int reservationId)
 		{
@@ -140,6 +148,10 @@ namespace Api.Controllers
 			});
 		}
 
+		/// <summary>
+		/// Get all payments for a reservation.
+		/// Used by Users Service for GDPR data export.
+		/// </summary>
 		[Authorize(Policy = "ServiceToService")]
 		[HttpGet("reservation/{reservationId}/all")]
 		public async Task<IActionResult> GetAllForReservation(int reservationId)

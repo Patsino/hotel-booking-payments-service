@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
 using System.Diagnostics.CodeAnalysis;
 
 namespace HotelBooking.Payments.Infrastructure.Persistence;
