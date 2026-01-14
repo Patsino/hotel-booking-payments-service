@@ -90,16 +90,19 @@ POST /api/payments/create-intent
 Response:
 {
   "paymentId": 123,
+  "paymentIntentId": "pi_xxx",
   "clientSecret": "pi_xxx_secret_yyy",
-  "status": "RequiresPayment"
+  "amount": 350.00,
+  "currency": "EUR"
 }
 ```
 
 **Backend Process:**
-1. Validate reservation exists (call Reservations Service)
-2. Create payment record in database
-3. Create PaymentIntent in Stripe
-4. Return client secret for frontend
+1. Validate reservation exists and is in payable state (Pending or Held) by calling Reservations Service
+2. Check for existing successful payments to prevent duplicate charges
+3. Create PaymentIntent in Stripe with metadata (user, room, dates)
+4. Create payment record in database with status `RequiresPayment`
+5. Return client secret to frontend (client secret is NOT stored in database)
 
 ### 2. Client Confirms Payment
 
@@ -125,16 +128,19 @@ Event: payment_intent.succeeded
 ```
 
 **Backend Process:**
-1. Validate webhook signature (security)
+1. Validate webhook signature for security
 2. Update payment status to `Succeeded`
-3. Call Reservations Service to confirm booking
-4. Return 200 OK to Stripe
+3. Store Stripe event ID in `LastProviderEventId`
+4. Call Reservations Service endpoint `/internal/reservations/{id}/mark-confirmed` to confirm booking
+5. Return 200 OK to Stripe
+
+**Note:** The webhook is the primary confirmation mechanism. Frontend confirmation is asynchronous and may be delayed or missed if the user closes their browser.
 
 ### 4. Reservation Confirmed
 
 Reservations Service receives confirmation:
 ```
-PATCH /api/internal/reservations/{id}/confirm
+POST /internal/reservations/{id}/mark-confirmed
 ```
 
 Booking status → `Confirmed` 
